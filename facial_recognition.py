@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import platform
 import ctypes
@@ -37,11 +38,11 @@ MODEL_PATH = MODEL_DIR / "lbph_face_model.xml"
 LABELS_PATH = MODEL_DIR / "labels.npy"
 
 def lock_computer():
-    sys_name = platform.system().lower()
+    system_name = platform.system().lower()
     try:
-        if "windows" in sys_name:
+        if "windows" in system_name:
             os.system("rundll32.exe user32.dll,LockWorkStation")
-        elif "darwin" in sys_name:
+        elif "darwin" in system_name:
             os.system("/System/Library/CoreServices/Menu\\ Extras/User.menu/Contents/Resources/CGSession -suspend")
         else:
             os.system("loginctl lock-session || gnome-screensaver-command -l || xdg-screensaver lock")
@@ -49,14 +50,14 @@ def lock_computer():
         st.error(f"Lock failed: {e}")
 
 def turn_off_screen():
-    sys_name = platform.system().lower()
+    system_name = platform.system().lower()
     try:
-        if "windows" in sys_name:
+        if "windows" in system_name:
             HWND_BROADCAST     = 0xFFFF
             WM_SYSCOMMAND      = 0x0112
             SC_MONITORPOWER    = 0xF170
             ctypes.windll.user32.SendMessageW(HWND_BROADCAST, WM_SYSCOMMAND, SC_MONITORPOWER, 2)
-        elif "darwin" in sys_name:
+        elif "darwin" in system_name:
             os.system("pmset displaysleepnow")
         else:
             os.system(
@@ -76,11 +77,11 @@ def toast_alert(msg: str):
 
 def sound_alert():
     try:
-        sys_name = platform.system().lower()
-        if "windows" in sys_name:
+        system_name = platform.system().lower()
+        if "windows" in system_name:
             import winsound
             winsound.Beep(1000, 300)
-        elif "darwin" in sys_name:
+        elif "darwin" in system_name:
             os.system("afplay /System/Library/Sounds/Glass.aiff 2>/dev/null || true")
         else:
             os.system(
