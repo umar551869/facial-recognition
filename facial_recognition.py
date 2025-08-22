@@ -100,17 +100,28 @@ def flash_overlay(frame, alpha=0.30, color=(0, 0, 255)):
 
 def load_or_init_model():
     try:
-        recognizer = cv2.face.LBPHFaceRecognizer_create()
-    except Exception:
-        st.error("LBPHFaceRecognizer missing. Install the contrib build:\n\n`pip install opencv-contrib-python`")
-        return None, {}
-    if MODEL_PATH.exists() and LABELS_PATH.exists():
-        recognizer.read(str(MODEL_PATH))
-        labels = np.load(LABELS_PATH, allow_pickle=True).item()
-    else:
-        recognizer = None
-        labels = {}
-    return recognizer, labels
+        # Try to import face_recognition library first
+        import face_recognition
+        recognizer = "face_recognition"
+        if MODEL_PATH.exists() and LABELS_PATH.exists():
+            labels = np.load(LABELS_PATH, allow_pickle=True).item()
+        else:
+            labels = {}
+        return recognizer, labels
+    except ImportError:
+        try:
+            # Fallback to OpenCV contrib if available
+            recognizer = cv2.face.LBPHFaceRecognizer_create()
+            if MODEL_PATH.exists() and LABELS_PATH.exists():
+                recognizer.read(str(MODEL_PATH))
+                labels = np.load(LABELS_PATH, allow_pickle=True).item()
+            else:
+                recognizer = None
+                labels = {}
+            return recognizer, labels
+        except Exception:
+            st.error("Face recognition not available. Install face_recognition:\n\n`pip install face_recognition`")
+            return None, {}
 
 def save_model(recognizer, labels):
     recognizer.write(str(MODEL_PATH))
